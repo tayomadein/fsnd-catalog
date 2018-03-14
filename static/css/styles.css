@@ -1,0 +1,33 @@
+*, *:before, *:after {
+    -webkit-box-sizing: border-box; 
+    -moz-box-sizing: border-box; 
+    box-sizing: border-box;
+}
+
+html, body {
+    font-family: 'Muli', sans-serif !important; /* Set font */
+    line-height: 1.8;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.btn {
+    border-radius: 20px;
+    text-align: center;
+    display: inline-block;
+    width: 150px;
+    height: 30px;
+    line-height: 30px;
+}
+
+.pull-left {
+    font-weight: 600;
+    padding: 0 25px;
+}
