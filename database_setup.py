@@ -5,7 +5,8 @@ Setup Database for Catalog
 #!/usr/bin/env python3
 
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
+import datetime
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -44,6 +45,7 @@ class Item(Base):
 
     name = Column(String(80), nullable=False)
     item_id = Column(Integer, primary_key=True)
+    date_created = Column(DateTime, default = datetime.datetime.utcnow)
     cat_id = Column(Integer, ForeignKey('category.cat_id'))
     description = Column(String(250))
     user_id = Column(Integer, ForeignKey('user.user_id'))
