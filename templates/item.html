@@ -7,6 +7,9 @@
     <div class="item-block">
         {% if login %}
             <p>
+                <a href="{{url_for('editItem', cat_id=item.cat_id, item_id=item.item_id)}}">Edit Item</a>
+            </p>
+            <p>
                 <a href="{{url_for('deleteItem', cat_id=item.cat_id, item_id=item.item_id)}}">Delete Item</a>
             </p>
         {% endif %}

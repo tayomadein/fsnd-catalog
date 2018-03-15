@@ -286,9 +286,33 @@ def deleteCategory(cat_id):
         return render_template('deletecategory.html', category=delete_category)
 
 
+@app.route('/category/<int:cat_id>/<int:item_id>/edit', methods=['GET', 'POST'])
+def editItem(cat_id, item_id):
+    ''' Edit an Item '''
+    edit_item = session.query(Item).filter_by(item_id=item_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if edit_item.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to edit this item. Please create your own item in order to edit.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        if request.form['name']:
+            edit_item.name = request.form['name']
+        if request.form['description']:
+            edit_item.description = request.form['description']
+        if request.form['category']:
+            edit_item.cat_id = request.form['category']
+        session.add(edit_item)
+        flash('%s has successfully editted item' %
+              login_session['username'], edit_item.name)
+        session.commit()
+        return redirect(url_for('showItem', cat_id=cat_id, item_id=item_id))
+    else:
+        categories = session.query(Category).all()
+        return render_template('edititem.html', item=edit_item, categories=categories)
+
 @app.route('/category/<int:cat_id>/<int:item_id>/delete', methods=['GET', 'POST'])
 def deleteItem(cat_id, item_id):
-    ''' Delete a Category '''
+    ''' Delete an Item '''
     delete_item = session.query(Item).filter_by(item_id=item_id).one()
     if 'username' not in login_session:
         return redirect('/login')
