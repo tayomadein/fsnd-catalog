@@ -186,7 +186,7 @@ def catalogJSON():
 # Handle Catalog
 
 
-@app.route('/category/<int: cat_id>/items')
+@app.route('/category/<int:cat_id>/items')
 def showCategory(cat_id):
     ''' Show all items in a category'''
     # categories = session.query(Category).all()

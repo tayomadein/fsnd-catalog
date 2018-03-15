@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Items for {{cat_name}}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="items-block">
+        <h2>Items in {{cat_name}}</h2>
+        {% for item in items %}
+            <a href="/"><h6>{{item.name}}</a></h6>        
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
