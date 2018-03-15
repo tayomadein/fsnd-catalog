@@ -58,4 +58,4 @@ python app.py
 
 * Step 2:
 
-Open your favorite browser and go to `http://localhost:5000/` or `http://0.0.0.0:5000/`
+Open your favorite browser and go to `http://localhost:5000/`
