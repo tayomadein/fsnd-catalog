@@ -259,16 +259,33 @@ def editCategory(cat_id):
     if request.method == 'POST':
         if request.form['name']:
             edit_category.name = request.form['name']
-        flash('%s has successfully updated category' %
+        flash('%s has successfully updated %s category' %
             login_session['username'], edit_category.name)
         session.commit()
         return redirect(url_for('showCategory', cat_id=cat_id))
     else:
         return render_template('editcategory.html', category=edit_category)
 
+@app.route('/category/<int:cat_id>/delete', methods=['GET', 'POST'])
+def deleteCategory(cat_id):
+    ''' Delete a Category '''
+    delete_category = session.query(Category).filter_by(cat_id=cat_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if delete_category.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to delete this category. Please create your own category in order to delete.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        session.delete(delete_category)
+        flash('%s has successfully deleted category' %
+            login_session['username'], delete_category.name)
+        session.commit()
+        return redirect(url_for('showHome'))
+    else:
+        return render_template('deletecategory.html', category=delete_category)
+
 """
-@app.route('/category/<int: cat_id>/<int: item_id>/edit')
-@app.route('/category/<int: cat_id>/<int: item_id>/delete') """
+@app.route('/category/<int:cat_id>/<int:item_id>/edit')
+@app.route('/category/<int:cat_id>/<int:item_id>/delete') """
 
 # Helper funtions for creating user
 
