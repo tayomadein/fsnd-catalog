@@ -248,6 +248,7 @@ def newItem():
             categories = session.query(Category).all()
             return render_template('newitem.html', categories=categories)
 
+
 @app.route('/category/<int:cat_id>/edit', methods=['GET', 'POST'])
 def editCategory(cat_id):
     ''' Edit a category '''
@@ -260,11 +261,12 @@ def editCategory(cat_id):
         if request.form['name']:
             edit_category.name = request.form['name']
         flash('%s has successfully updated %s category' %
-            login_session['username'], edit_category.name)
+              login_session['username'], edit_category.name)
         session.commit()
         return redirect(url_for('showCategory', cat_id=cat_id))
     else:
         return render_template('editcategory.html', category=edit_category)
+
 
 @app.route('/category/<int:cat_id>/delete', methods=['GET', 'POST'])
 def deleteCategory(cat_id):
@@ -277,19 +279,31 @@ def deleteCategory(cat_id):
     if request.method == 'POST':
         session.delete(delete_category)
         flash('%s has successfully deleted category' %
-            login_session['username'], delete_category.name)
+              login_session['username'], delete_category.name)
         session.commit()
         return redirect(url_for('showHome'))
     else:
         return render_template('deletecategory.html', category=delete_category)
 
-"""
-@app.route('/category/<int:cat_id>/<int:item_id>/edit')
-@app.route('/category/<int:cat_id>/<int:item_id>/delete') """
+
+@app.route('/category/<int:cat_id>/<int:item_id>/delete', methods=['GET', 'POST'])
+def deleteItem(cat_id, item_id):
+    ''' Delete a Category '''
+    delete_item = session.query(Item).filter_by(item_id=item_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if delete_item.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to delete this item. Please create your own item in order to delete.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        session.delete(delete_item)
+        flash('%s has successfully deleted item' %
+              login_session['username'], delete_item.name)
+        session.commit()
+        return redirect(url_for('showCategory', cat_id=cat_id))
+    else:
+        return render_template('deleteitem.html', item=delete_item)
 
 # Helper funtions for creating user
-
-
 def createUser(login_session):
     newUser = User(name=login_session['username'], email=login_session[
                    'email'], picture=login_session['picture'])
