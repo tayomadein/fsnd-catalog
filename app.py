@@ -30,12 +30,12 @@ session = DBSession()
 @app.route('/')
 # shows a list of all categories
 def showHome():
-    category = session.query(Category).order_by(asc(Category.name))
+    categories = session.query(Category).order_by(asc(Category.name))
     # latest_items = session.query(Item).order_by(asc())
     if 'username' not in login_session:
-        return render_template('index.html', category=category)
+        return render_template('index.html', categories=categories)
     else:
-        return render_template('index.html', category=category)
+        return render_template('index.html', login=True, categories=categories)
 
 @app.route('/login')
 def showLogin():
@@ -46,6 +46,7 @@ def showLogin():
     # return "The current session state is %s" %login_session['state']
     return render_template('login.html', STATE=state)
 
+# CONNECT - Set a user's login_session
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # Validate state token
@@ -106,6 +107,12 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
+    # see if user exists, if not create a new user
+    user_id = getUserID(data["email"])
+    if not user_id:
+        user_id = createUser(login_session)
+    login_session['user_id'] = user_id
+
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
@@ -117,39 +124,92 @@ def gconnect():
     print "done!"
     return output
     
-
+# DISCONNECT - Revoke a current user's token and reset their login_session
 @app.route('/gdisconnect')
 def gdisconnect():
     # Only disconnect a connected user
-    credentials = login_session.get('credentials')
-    if credentials is None:
-        response = make_response(json.dumps('User is not connected'), 401)
+    access_token = login_session.get('access_token')
+    if access_token is None:
+        print 'Access Token is None'
+        response = make_response(json.dumps('User is not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
+    print 'In gdisconnect access token is %s', access_token
+    print 'User name is: '
+    print login_session['username']
     # Execute HTTP GET request to revoke current token.
-    access_token = credentials.access_token
-    url = 'http://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     # Handle result
+    print 'result is '
+    print result
     if result['status'] == '200':
-        # Reset the user's session.
-        del login_session['credentials']
+        del login_session['access_token']
         del login_session['gplus_id']
         del login_session['username']
         del login_session['email']
         del login_session['picture']
-
-        response = make_response(json.dumps(
-            'User has successfully been disconnected.'), 200)
+        response = make_response(json.dumps('Successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
     else:
         # If the token is invalid
-        response = make_response(json.dumps(
-            'Failed to revoke token for this user'), 400)
+        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
+
+# JSON APIs for catalog
+@app.route('/catalog/JSON')
+def catalogJSON():
+    ''' Return all entries '''
+    catalog = session.query(Item).all()
+    return jsonify(Items=[i.serialize for i in catalog])
+
+# Handle Catalog
+@app.route('/category/add', methods=['GET', 'POST'])
+def newCategory():
+    ''' Create a new category'''
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        newCategory = Category(name=request.form['name'], user_id=login_session['user_id'])
+        session.add(newCategory)
+        flash('%s has successfully created category' % newCategory.name, login_session['username'])
+        session.commit()
+        return redirect(url_for('showHome'))
+    else:
+        return render_template('newcategory.html')
+
+""" @app.route('/catalog/<int: cat_id>/items')
+@app.route('/catalog/<int: cat_id>/<int: item_id>')
+@app.route('/catalog/<int: cat_id>/edit')
+@app.route('/catalog/<int: cat_id>/delete')
+@app.route('/catalog/<int: cat_id>/add')
+@app.route('/catalog/<int: cat_id>/<int: item_id>/edit')
+@app.route('/catalog/<int: cat_id>/<int: item_id>/delete') """
+
+# Helper funtions for creating user
+def createUser(login_session):
+    newUser = User(name=login_session['username'], email=login_session[
+                   'email'], picture=login_session['picture'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    return user.id
+
+
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    return user
+
+
+def getUserID(email):
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        return user.user_id
+    except:
+        return None
 
 if __name__ == '__main__':
     app.secret_key = 'my_super_secret_key'

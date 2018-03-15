@@ -6,11 +6,9 @@
     <h2>Categories</h2>
     {% if login %}
     <p>
-      <!-- {{url_for('newCategory')}} -->
-      <a href="/">Add new Category</a>
+      <a href="{{url_for('newCategory')}}">Add new Category</a>
     </p>
     {% endif %} {% for category in categories %}
-    <!-- {{url_for('categoryView', category = category.name)}} -->
     <a href="/">
       <h4>{{category.name}}</h4>
     </a>
@@ -20,11 +18,9 @@
     <h2>Latest Items</h2>
     {% if login %}
     <p>
-      <!-- {{url_for('newItem')}} -->
       <a href="/">Add new Item</a>
     </p>
     {% endif %} {% for item in recent_items %}
-    <!-- {{url_for('itemView', category = item.category.name, item = item.name)}} -->
     <a href="/">
       <h4>{{item.name}}</a>
     <span class="text-warning">({{item.category.name}})</span>
