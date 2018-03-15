@@ -17,7 +17,8 @@ import requests
 
 app = Flask(__name__)
 
-CLIENT_ID = json.loads(open('client_secret.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(open('client_secret.json', 'r').read())[
+    'web']['client_id']
 
 # Create session and connect to DB
 engine = create_engine('sqlite:///catalog.db')
@@ -27,15 +28,19 @@ session = DBSession()
 
 # Create a state token to prevent request forgery.
 # Store it in the session for later validation
+
+
 @app.route('/')
 # shows a list of all categories
 def showHome():
     categories = session.query(Category).order_by(asc(Category.name))
-    # latest_items = session.query(Item).order_by(asc())
+    latest_items = session.query(Item).order_by(
+        asc(Item.date_created)).all()[:10]
     if 'username' not in login_session:
-        return render_template('index.html', categories=categories)
+        return render_template('index.html', categories=categories, latest_items=latest_items)
     else:
-        return render_template('index.html', login=True, categories=categories)
+        return render_template('index.html', login=True, categories=categories, latest_items=latest_items)
+
 
 @app.route('/login')
 def showLogin():
@@ -47,6 +52,8 @@ def showLogin():
     return render_template('login.html', STATE=state)
 
 # CONNECT - Set a user's login_session
+
+
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # Validate state token
@@ -57,17 +64,19 @@ def gconnect():
     # Obtain authorization code
     code = request.data
     try:
-        #Ugrade the authorization code into a credentials object
+        # Ugrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets('client_secret.json', scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
-        response = make_response(json.dumps('Failed to upgrade the authorization code.'), 401)
+        response = make_response(json.dumps(
+            'Failed to upgrade the authorization code.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     # Check that accesss token is valid
     access_token = credentials.access_token
-    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % access_token)
+    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' %
+           access_token)
     h = httplib2.Http()
     result = json.loads(h.request(url, 'GET')[1])
     # IF there was an error in the access token info, abort mission!
@@ -77,12 +86,14 @@ def gconnect():
     # Verify that the access token is used for the intended user.response
     gplus_id = credentials.id_token['sub']
     if result['user_id'] != gplus_id:
-        response = make_response(json.dumps("Token's users ID doesn't match given user ID"), 401)
+        response = make_response(json.dumps(
+            "Token's users ID doesn't match given user ID"), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     # Verify that the access token is valid for this app.
     if result['issued_to'] != CLIENT_ID:
-        response = make_response(json.dumps("Token's client ID doesn't match given app's ID."), 401)
+        response = make_response(json.dumps(
+            "Token's client ID doesn't match given app's ID."), 401)
         print "Token's client ID doesn't match given app's ID."
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -90,9 +101,10 @@ def gconnect():
     stored_credentials = login_session.get('credentials')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_credentials is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps("User is currently logged in"), 200)
+        response = make_response(json.dumps(
+            "User is currently logged in"), 200)
         response.headers['Content-Type'] = 'application/json'
-    
+
     # Store the access token in the session for later use
     login_session['access_token'] = credentials.access_token
     login_session['gplus_id'] = gplus_id
@@ -123,8 +135,10 @@ def gconnect():
     flash("Welcome, %s" % login_session['username'])
     print "done!"
     return output
-    
+
 # DISCONNECT - Revoke a current user's token and reset their login_session
+
+
 @app.route('/gdisconnect')
 def gdisconnect():
     # Only disconnect a connected user
@@ -155,11 +169,14 @@ def gdisconnect():
         return response
     else:
         # If the token is invalid
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response = make_response(json.dumps(
+            'Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
 
 # JSON APIs for catalog
+
+
 @app.route('/catalog/JSON')
 def catalogJSON():
     ''' Return all entries '''
@@ -167,29 +184,70 @@ def catalogJSON():
     return jsonify(Items=[i.serialize for i in catalog])
 
 # Handle Catalog
+
+
+@app.route('/category/<int: cat_id>/items')
+def showCategory(cat_id):
+    ''' Show all items in a category'''
+    # categories = session.query(Category).all()
+    cat_name = session.query(Category).filter_by(cat_id=cat_id).one().name
+    items = session.query(Item).filter_by(cat_id=cat_id)
+    if 'username' not in login_session:
+        return render_template('category.html',
+                               items=items, cat_name=cat_name)
+    else:
+        return render_template('category.html',
+                               login=True, items=items, cat_name=cat_name)
+
+
 @app.route('/category/add', methods=['GET', 'POST'])
 def newCategory():
     ''' Create a new category'''
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
-        newCategory = Category(name=request.form['name'], user_id=login_session['user_id'])
+        newCategory = Category(
+            name=request.form['name'], user_id=login_session['user_id'])
         session.add(newCategory)
-        flash('%s has successfully created category' % newCategory.name, login_session['username'])
+        flash('%s has successfully created category' %
+              newCategory.name, login_session['username'])
         session.commit()
         return redirect(url_for('showHome'))
     else:
         return render_template('newcategory.html')
 
-""" @app.route('/catalog/<int: cat_id>/items')
-@app.route('/catalog/<int: cat_id>/<int: item_id>')
-@app.route('/catalog/<int: cat_id>/edit')
-@app.route('/catalog/<int: cat_id>/delete')
-@app.route('/catalog/<int: cat_id>/add')
-@app.route('/catalog/<int: cat_id>/<int: item_id>/edit')
-@app.route('/catalog/<int: cat_id>/<int: item_id>/delete') """
+
+@app.route('/category/item/add', methods=['GET', 'POST'])
+def newItem():
+    ''' Create a new item in a category '''
+    if 'username' not in login_session:
+        return redirect('/login')
+    else:
+        if request.method == 'POST':
+            name = request.form['name']
+            description = request.form['description']
+            cat_id = request.form['category']
+            print cat_id
+            newItem = Item(name=name, description=description, cat_id=cat_id,
+                           user_id=login_session['user_id'])
+            session.add(newItem)
+            session.commit()
+            return redirect(url_for('showHome'))
+        else:
+            categories = session.query(Category).all()
+            return render_template('newitem.html', categories=categories)
+
+
+"""
+@app.route('/category/<int: cat_id>/<int: item_id>')
+@app.route('/category/<int: cat_id>/edit')
+@app.route('/category/<int: cat_id>/delete')
+@app.route('/category/<int: cat_id>/<int: item_id>/edit')
+@app.route('/category/<int: cat_id>/<int: item_id>/delete') """
 
 # Helper funtions for creating user
+
+
 def createUser(login_session):
     newUser = User(name=login_session['username'], email=login_session[
                    'email'], picture=login_session['picture'])
@@ -210,6 +268,7 @@ def getUserID(email):
         return user.user_id
     except:
         return None
+
 
 if __name__ == '__main__':
     app.secret_key = 'my_super_secret_key'

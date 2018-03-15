@@ -18,13 +18,13 @@
     <h2>Latest Items</h2>
     {% if login %}
     <p>
-      <a href="/">Add new Item</a>
+      <a href="{{url_for('newItem')}}">Add new Item</a>
     </p>
-    {% endif %} {% for item in recent_items %}
+    {% endif %} {% for item in latest_items %}
     <a href="/">
-      <h4>{{item.name}}</a>
-    <span class="text-warning">({{item.category.name}})</span>
-    </h4>
+      <h6>{{item.name}}</a><!-- 
+    <span class="text-warning">({{item.category.name}})</span> -->
+    </h6>
     {% endfor %}
   </div>
 </div>
