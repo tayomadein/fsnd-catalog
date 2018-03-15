@@ -194,10 +194,10 @@ def showCategory(cat_id):
     items = session.query(Item).filter_by(cat_id=cat_id)
     if 'username' not in login_session:
         return render_template('category.html',
-                               items=items, cat_name=cat_name)
+                               items=items, cat_name=cat_name, cat_id=cat_id)
     else:
         return render_template('category.html',
-                               login=True, items=items, cat_name=cat_name)
+                               login=True, items=items, cat_name=cat_name, cat_id=cat_id)
 
 
 @app.route('/category/<int:cat_id>/<int:item_id>')
@@ -221,7 +221,7 @@ def newCategory():
             name=request.form['name'], user_id=login_session['user_id'])
         session.add(newCategory)
         flash('%s has successfully created category' %
-              newCategory.name, login_session['username'])
+              login_session['username'], newCategory.name)
         session.commit()
         return redirect(url_for('showHome'))
     else:
@@ -248,10 +248,25 @@ def newItem():
             categories = session.query(Category).all()
             return render_template('newitem.html', categories=categories)
 
+@app.route('/category/<int:cat_id>/edit', methods=['GET', 'POST'])
+def editCategory(cat_id):
+    ''' Edit a category '''
+    edit_category = session.query(Category).filter_by(cat_id=cat_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if edit_category.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to edit this category. Please create your own category in order to edit.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        if request.form['name']:
+            edit_category.name = request.form['name']
+        flash('%s has successfully updated category' %
+            login_session['username'], edit_category.name)
+        session.commit()
+        return redirect(url_for('showCategory', cat_id=cat_id))
+    else:
+        return render_template('editcategory.html', category=edit_category)
 
 """
-@app.route('/category/<int: cat_id>/edit')
-@app.route('/category/<int: cat_id>/delete')
 @app.route('/category/<int: cat_id>/<int: item_id>/edit')
 @app.route('/category/<int: cat_id>/<int: item_id>/delete') """
 

@@ -5,6 +5,11 @@
 {% block content %}
 <div class="row">
     <div class="items-block">
+        {% if login %}
+            <p>
+              <a href="{{url_for('editCategory', cat_id=cat_id)}}">Edit Category</a>
+            </p>
+        {% endif %}
         <h2>Items in {{cat_name}}</h2>
         {% for item in items %}
             <a href="{{url_for('showItem', cat_id = item.cat_id, item_id = item.item_id)}}"><h6>{{item.name}}</a></h6>        
