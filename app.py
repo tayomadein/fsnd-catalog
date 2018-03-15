@@ -188,7 +188,7 @@ def catalogJSON():
 
 @app.route('/category/<int:cat_id>/items')
 def showCategory(cat_id):
-    ''' Show all items in a category'''
+    ''' Show all items in a category '''
     # categories = session.query(Category).all()
     cat_name = session.query(Category).filter_by(cat_id=cat_id).one().name
     items = session.query(Item).filter_by(cat_id=cat_id)
@@ -198,6 +198,17 @@ def showCategory(cat_id):
     else:
         return render_template('category.html',
                                login=True, items=items, cat_name=cat_name)
+
+
+@app.route('/category/<int:cat_id>/<int:item_id>')
+def showItem(cat_id, item_id):
+    ''' Show all details about an item '''
+    cat_name = session.query(Category).filter_by(cat_id=cat_id).one().name
+    item = session.query(Item).filter_by(item_id=item_id).one()
+    if 'username' not in login_session:
+        return render_template('item.html', item=item, cat_name=cat_name)
+    else:
+        return render_template('item.html', login=True, item=item, cat_name=cat_name)
 
 
 @app.route('/category/add', methods=['GET', 'POST'])
@@ -239,7 +250,6 @@ def newItem():
 
 
 """
-@app.route('/category/<int: cat_id>/<int: item_id>')
 @app.route('/category/<int: cat_id>/edit')
 @app.route('/category/<int: cat_id>/delete')
 @app.route('/category/<int: cat_id>/<int: item_id>/edit')

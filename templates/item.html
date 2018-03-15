@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Details for {{item.name}}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="item-block">
+        <h2>{{item.name}}</h2>
+        <p>Description: {{item.description}}</p>
+        <p>Category: {{cat_name}}</p>
+        <p>Created On: {{item.date_created}}</p>
+    </div>
+</div>
+{% endblock %}

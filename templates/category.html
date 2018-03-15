@@ -7,7 +7,7 @@
     <div class="items-block">
         <h2>Items in {{cat_name}}</h2>
         {% for item in items %}
-            <a href="/"><h6>{{item.name}}</a></h6>        
+            <a href="{{url_for('showItem', cat_id = item.cat_id, item_id = item.item_id)}}"><h6>{{item.name}}</a></h6>        
         {% endfor %}
     </div>
 </div>
