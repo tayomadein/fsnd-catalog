@@ -5,12 +5,12 @@
     <h2>Edit Item</h2>
     <p>
         <label for="name">Name
-            <input type="text" name="name" id="name" placeholder="{{item.name}}">
+            <input class="text-field" type="text" name="name" id="name" placeholder="{{item.name}}">
         </label>
     </p>
     <p>
         <label for="description">Description
-            <textarea name="description" id="description" cols="30" rows="3" placeholder="{{item.description}}"></textarea>
+            <textarea class="text-field" name="description" id="description" cols="30" rows="3" placeholder="{{item.description}}"></textarea>
         </label>
     </p>
     <p>
@@ -22,6 +22,6 @@
             </select>
         </label>
     </p>
-    <input type="submit" value="Update">
+    <input class="btn btn-round btn-warning" type="submit" value="Update">
 </form>
 {% endblock %}

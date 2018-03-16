@@ -22,7 +22,7 @@
         <nav class="navbar" id="navbar">
             <div class="pull-left">
                 <!-- Avatar/Logo/Placeholder -->
-                <a href="#" class="logo">
+                <a href="/" class="logo">
                     <i class="fa fa-500px"></i>
                     catalog
                 </a>
@@ -30,16 +30,18 @@
 
             <div class="pull-right">
                 {% if login %}
-                <a href="/gdisconnect" class="btn btn-nav">Logout</a>
+                <a href="/gdisconnect" class="btn btn-primary btn-round">Logout</a>
                 {% else %}
-                <a href="/login" class="btn btn-nav">Login</a>
+                <a href="/login" class="btn btn-primary btn-round">Login</a>
                 {% endif %}
             </div>
         </nav>
     </header>
-    <div class="container-fluid content-block">
-        <!-- Content goes here -->
-        {% block content %}{% endblock %}
+    <div class="container">
+        <div class="content-block">
+            <!-- Content goes here -->
+            {% block content %}{% endblock %}
+        </div>
     </div>
 
     <!-- JS links -->

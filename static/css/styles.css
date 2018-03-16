@@ -18,13 +18,9 @@ a {
     color: inherit;
 }
 
-.btn {
+.btn-round {
     border-radius: 20px;
-    text-align: center;
-    display: inline-block;
     width: 150px;
-    height: 30px;
-    line-height: 30px;
 }
 
 .pull-left {
@@ -32,10 +28,23 @@ a {
     padding: 0 25px;
 }
 
+.content-block {
+    margin: auto;
+}
+
 .avatar {
-    width: 300px;
-    height: 300px;
-    border-radius: 150px;
-    -webkit-border-radius: 150px;
-    -moz-border-radius: 150px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50px;
+    -webkit-border-radius: 50px;
+    -moz-border-radius: 50px;
+}
+
+.text-field {
+    margin-left: 10px;
+    width: 150px;
+    border-radius: 10px;
+    border: 1px solid #4e4e4e;
+    line-height: 30px;
+    padding: 0px;
 }
