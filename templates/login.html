@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block extra_head %}
+<!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
+  <script src="//apis.google.com/js/platform.js?onload=start"> </script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div id="signinButton" class="login-btn">
+        <span class="g-signin"
+            data-scope="openid email"
+            data-clientid="1032016680537-h292spr9seru1ug7ds89latp97p2iirf.apps.googleusercontent.com"
+            data-redirecturi="postmessage"
+            data-accesstype="offline"
+            data-cookiepolicy="single_host_origin"
+            data-callback="signInCallback"
+            data-approvalprompt="force">
+        </span>
+    </div>
+    <div class="pane" id="result" style="display: none"></div>
+</div>
+<script>
+    function signInCallback(authResult) {
+    if (authResult['code']) {
+        // Hide the sign-in button once user is authorized
+        $('#signinButton').attr('style', 'display: none');
+        $('#result').attr('style', 'display: block');
+        // Send the one-time code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main home page
+        $.ajax({
+            type: 'POST',
+            url: '/gconnect?state={{STATE}}',
+            processData: false,
+            contentType: 'application/octet-stream; charset=utf-8',
+            data: authResult['code'],
+            success: function (result) {
+                if (result) {
+                    $('#result').html('<h3>Login Successful!</h3></br>' + result + '</br><h3>Redirecting...</h3>')
+                    setTimeout(function () {
+                        window.location.href = "/";
+                    }, 4000);
+                } else if (authResult['error']) {
+                    console.log('There was an error: ' + authResult['error']);
+                } else {
+                    $('#result').html('Failed to make a server-side call, Check your configuration and console.');
+                }
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

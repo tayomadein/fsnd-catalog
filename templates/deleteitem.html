@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Delete Item{% endblock %}
+{% block content %}
+<form method="post">
+    <h2>Delete {{item.name}}</h2>
+    <p>Are you sure you want to delete this item? Warning: It will be lost forever</p>
+    <input class="btn btn-round btn-danger" type="submit" value="Delete">
+</form>
+{% endblock %}

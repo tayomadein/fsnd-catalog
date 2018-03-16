@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Items for {{cat_name}}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="items-block">
+        <h2>Items in {{cat_name}}</h2>
+        {% for item in items %}
+            <h6><a href="{{url_for('showItem', cat_id = item.cat_id, item_id = item.item_id)}}">{{item.name}}</a></h6>        
+        {% endfor %}
+        {% if login %}
+            <a class="btn btn-round btn-warning" href="{{url_for('editCategory', cat_id=cat_id)}}">Edit Category</a>
+            <a class="btn btn-round btn-danger" href="{{url_for('deleteCategory', cat_id=cat_id)}}">Delete Category</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

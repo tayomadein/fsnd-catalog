@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Catalog{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-4 category-block">
+    <h2>Categories</h2>
+    {% if login %}
+    <p>
+      <a class="btn btn-success btn-round" href="{{url_for('newCategory')}}">Add Category</a>
+    </p>
+    {% endif %} {% for category in categories %}
+    <a href="{{url_for('showCategory', cat_id = category.cat_id)}}">
+      <h4>{{category.name}}</h4>
+    </a>
+    {% endfor %}
+  </div>
+  <div class="col-md-8 items-block">
+    <h2>Latest Items</h2>
+    {% if login %}
+    <p>
+      <a class="btn btn-success btn-round" href="{{url_for('newItem')}}">Add Item</a>
+    </p>
+    {% endif %}
+    {% for item in latest_items %}
+    <a href="{{url_for('showItem', cat_id = item.cat_id, item_id = item.item_id)}}">
+      <h6>{{item.name}}</a><!-- 
+    <span class="text-warning">({{item.category.name}})</span> -->
+    </h6>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

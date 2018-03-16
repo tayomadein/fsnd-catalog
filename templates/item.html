@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Details for {{item.name}}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="item-block">
+        <h2>{{item.name}}</h2>
+        <p>Description: {{item.description}}</p>
+        <p>Category: {{cat_name}}</p>
+        <p>Created On: {{item.date_created}}</p>
+        {% if login %}
+            <a class="btn btn-round btn-warning" href="{{url_for('editItem', cat_id=item.cat_id, item_id=item.item_id)}}">Edit Item</a>
+            <a class="btn btn-round btn-danger" href="{{url_for('deleteItem', cat_id=item.cat_id, item_id=item.item_id)}}">Delete Item</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

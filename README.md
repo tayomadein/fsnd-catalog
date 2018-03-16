@@ -43,10 +43,10 @@ You can now run `vagrant ssh` to log in to your newly installed Linux VM! Follow
 
 Clone this repo to your `vagrant` root folder
 ```
-git clone https://github.com/tayomadein/catalog.git
+git clone https://github.com/tayomadein/fsnd-catalog.git
 ```
 ___or___
-Download this repo as a zipped file from [Github](https://github.com/tayomadein/catalog/archive/master.zip)
+Download this repo as a zipped file from [Github](https://github.com/tayomadein/fsnd-catalog/archive/master.zip)
 
 * Step 1:
 
@@ -58,4 +58,4 @@ python app.py
 
 * Step 2:
 
-Open your favorite browser and go to `http://localhost:5000/` or `http://0.0.0.0:5000/`
+Open your favorite browser and go to `http://localhost:5000/`
