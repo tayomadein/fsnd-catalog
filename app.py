@@ -310,6 +310,7 @@ def editItem(cat_id, item_id):
         categories = session.query(Category).all()
         return render_template('edititem.html', item=edit_item, categories=categories)
 
+
 @app.route('/category/<int:cat_id>/<int:item_id>/delete', methods=['GET', 'POST'])
 def deleteItem(cat_id, item_id):
     ''' Delete an Item '''
@@ -327,7 +328,15 @@ def deleteItem(cat_id, item_id):
     else:
         return render_template('deleteitem.html', item=delete_item)
 
+
+@app.errorhandler(404)
+def notFound(e):
+    ''' Handle pages/URLs that don't exist '''
+    return render_template('404.html'), 404
+
 # Helper funtions for creating user
+
+
 def createUser(login_session):
     newUser = User(name=login_session['username'], email=login_session[
                    'email'], picture=login_session['picture'])
