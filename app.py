@@ -179,9 +179,22 @@ def gdisconnect():
 
 @app.route('/catalog/JSON')
 def catalogJSON():
-    ''' Return all entries '''
+    ''' Return all items in the catalog '''
     catalog = session.query(Item).all()
-    return jsonify(Items=[i.serialize for i in catalog])
+    return jsonify(Catalog=[i.serialize for i in catalog])
+
+@app.route('/category/<int:cat_id>/JSON')
+def categoryJSON(cat_id):
+    ''' Return all items in a category '''
+    items = session.query(Item).filter_by(cat_id=cat_id).all()
+    return jsonify(categoryItems=[i.serialize for i in items])
+
+
+@app.route('/item/<int:item_id>/JSON')
+def itemJSON(item_id):
+    ''' Return details about one item '''
+    item = session.query(Item).filter_by(item_id=item_id).one()
+    return jsonify(Item=item.serialize)
 
 # Handle Catalog
 
