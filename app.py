@@ -55,6 +55,8 @@ def showLogin():
 # CONNECT - Set a user's login_session
 
 # Google Login
+
+
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # Validate state token
@@ -123,7 +125,7 @@ def gconnect():
     login_session['provider'] = 'google'
 
     # see if user exists, if not create a new user
-    user_id = getUserID(data["email"])
+    user_id = getUserID(login_session["email"])
     if not user_id:
         user_id = createUser(login_session)
     login_session['user_id'] = user_id
@@ -174,6 +176,8 @@ def gdisconnect():
         return response
 
 # FB Login
+
+
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
     ''' Connect with facebook '''
@@ -187,24 +191,18 @@ def fbconnect():
         'web']['app_id']
     app_secret = json.loads(
         open('fb_client_secret.json', 'r').read())['web']['app_secret']
-    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-        app_id, app_secret, access_token)
+    url = ('https://graph.facebook.com/oauth/access_token?grant_type='
+           'fb_exchange_token&client_id=%s&client_secret=%s&'
+           'fb_exchange_token=%s') % (app_id, app_secret, access_token)
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
 
-
     # Use token to get user info from API
     userinfo_url = "https://graph.facebook.com/v2.12/me"
-    '''
-        Due to the formatting for the result from the server token exchange we have to
-        split the token first on commas and select the first index which gives us the key : value
-        for the server access token then we split it on colons to pull out the actual token value
-        and replace the remaining quotes with nothing so that it can be used directly in the graph
-        api calls
-    '''
     token = result.split(',')[0].split(':')[1].replace('"', '')
 
-    url = 'https://graph.facebook.com/v2.12/me?access_token=%s&fields=name,id,email' % token
+    url = ('https://graph.facebook.com/v2.12/me?access_token=%s&fields'
+           '=name,id,email') % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     # print "url sent for API access:%s"% url
@@ -219,7 +217,8 @@ def fbconnect():
     login_session['access_token'] = token
 
     # Get user picture
-    url = 'https://graph.facebook.com/v2.12/me/picture?access_token=%s&redirect=0&height=200&width=200' % token
+    url = ('https://graph.facebook.com/v2.12/me/picture?access_token=%s'
+           '&redirect=0&height=200&width=200') % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
     data = json.loads(result)
@@ -251,7 +250,8 @@ def fbdisconnect():
     facebook_id = login_session['facebook_id']
     # The access token must me included to successfully logout
     access_token = login_session['access_token']
-    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id,access_token)
+    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (
+        facebook_id, access_token)
     h = httplib2.Http()
     result = h.request(url, 'DELETE')[1]
     return "you have been logged out"
@@ -341,8 +341,8 @@ def newCategory():
         newCategory = Category(
             name=request.form['name'], user_id=login_session['user_id'])
         session.add(newCategory)
-        flash('%s has successfully created category' %
-              login_session['username'], newCategory.name)
+        flash('%s has successfully created category %s' %
+              (login_session['username'], newCategory.name))
         session.commit()
         return redirect(url_for('showHome'))
     else:
@@ -384,7 +384,7 @@ def editCategory(cat_id):
         if request.form['name']:
             edit_category.name = request.form['name']
         flash('%s has successfully updated %s category' %
-              login_session['username'], edit_category.name)
+              (login_session['username'], edit_category.name))
         session.commit()
         return redirect(url_for('showCategory', cat_id=cat_id))
     else:
@@ -403,8 +403,8 @@ def deleteCategory(cat_id):
                 "order to delete.');}</script><body onload='myFunction()''>")
     if request.method == 'POST':
         session.delete(delete_category)
-        flash('%s has successfully deleted category' %
-              login_session['username'], delete_category.name)
+        flash('%s has successfully deleted category %s' %
+              (login_session['username'], delete_category.name))
         session.commit()
         return redirect(url_for('showHome'))
     else:
@@ -430,8 +430,8 @@ def editItem(cat_id, item_id):
         if request.form['category']:
             edit_item.cat_id = request.form['category']
         session.add(edit_item)
-        flash('%s has successfully editted item' %
-              login_session['username'], edit_item.name)
+        flash('%s has successfully editted item %s' %
+              (login_session['username'], edit_item.name))
         session.commit()
         return redirect(url_for('showItem', cat_id=cat_id, item_id=item_id))
     else:
@@ -453,8 +453,8 @@ def deleteItem(cat_id, item_id):
                 "order to delete.');}</script><body onload='myFunction()''>")
     if request.method == 'POST':
         session.delete(delete_item)
-        flash('%s has successfully deleted item' %
-              login_session['username'], delete_item.name)
+        flash('%s has successfully deleted item %s' %
+              (login_session['username'], delete_item.name))
         session.commit()
         return redirect(url_for('showCategory', cat_id=cat_id))
     else:
