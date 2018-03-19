@@ -29,13 +29,14 @@ class Category(Base):
     cat_id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.user_id'))
     user = relationship(User)
+    item = relationship('Item', cascade='all, delete-orphan')
 
     @property
     def serialize(self):
         ''' Serialize function to send JSON objects in a serializable format'''
         return {
             'name': self.name,
-            'cat_id': self.id,
+            'cat_id': self.cat_id,
         }
 
 
