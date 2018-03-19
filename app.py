@@ -379,7 +379,8 @@ def editCategory(cat_id):
     if edit_category.user_id != login_session['user_id']:
         return ("<script>function myFunction() {alert('You are not authorized"
                 "to edit this category. Please create your own category in "
-                "order to edit.');}</script><body onload='myFunction()''>")
+                "order to edit.');window.location.href = '/';}</script><body"
+                " onload='myFunction()''>")
     if request.method == 'POST':
         if request.form['name']:
             edit_category.name = request.form['name']
@@ -400,7 +401,8 @@ def deleteCategory(cat_id):
     if delete_category.user_id != login_session['user_id']:
         return ("<script>function myFunction() {alert('You are not authorized"
                 "to delete this category. Please create your own category in "
-                "order to delete.');}</script><body onload='myFunction()''>")
+                "order to delete.');window.location.href = '/';}</script><body"
+                " onload='myFunction()''>")
     if request.method == 'POST':
         session.delete(delete_category)
         flash('%s has successfully deleted category %s' %
@@ -421,7 +423,8 @@ def editItem(cat_id, item_id):
     if edit_item.user_id != login_session['user_id']:
         return ("<script>function myFunction() {alert('You are not authorized"
                 "to edit this item. Please create your own item in "
-                "order to edit.');}</script><body onload='myFunction()''>")
+                "order to edit.');window.location.href = '/';}</script><body"
+                " onload='myFunction()''>")
     if request.method == 'POST':
         if request.form['name']:
             edit_item.name = request.form['name']
@@ -450,7 +453,8 @@ def deleteItem(cat_id, item_id):
     if delete_item.user_id != login_session['user_id']:
         return ("<script>function myFunction() {alert('You are not authorized"
                 "to delete this item. Please create your own item in "
-                "order to delete.');}</script><body onload='myFunction()''>")
+                "order to delete.'); window.location.href = '/';}</script><body"
+                " onload='myFunction()''>")
     if request.method == 'POST':
         session.delete(delete_item)
         flash('%s has successfully deleted item %s' %
