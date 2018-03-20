@@ -31,14 +31,12 @@ session = DBSession()
 @app.route('/')
 # shows a list of all categories
 def showHome():
+    ''' Handle home page '''
     categories = session.query(Category).order_by(asc(Category.name))
     latest_items = session.query(Item).order_by(
         asc(Item.date_created)).all()[:10]
-    if 'username' not in login_session:
-        return render_template('index.html', categories=categories,
-                               latest_items=latest_items)
-    else:
-        return render_template('index.html', login=True,
+    login = 'username' in login_session
+    return render_template('index.html', login=login,
                                categories=categories,
                                latest_items=latest_items)
 
@@ -59,6 +57,7 @@ def showLogin():
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    ''' Handle login by connecting via Google auth API '''
     # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state'), 401)
@@ -146,6 +145,7 @@ def gconnect():
 
 @app.route('/gdisconnect')
 def gdisconnect():
+    ''' Disconnect from google '''
     # Only disconnect a connected user
     access_token = login_session.get('access_token')
     if access_token is None:
@@ -180,7 +180,7 @@ def gdisconnect():
 
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
-    ''' Connect with facebook '''
+    ''' Handle authentication by connecting with facebook '''
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -260,6 +260,7 @@ def fbdisconnect():
 # Disconnect based on provider
 @app.route('/logout')
 def logout():
+    ''' Handle logout from multiple providers'''
     if 'provider' in login_session:
         if login_session['provider'] == 'google':
             gdisconnect()
@@ -312,11 +313,8 @@ def showCategory(cat_id):
     # categories = session.query(Category).all()
     cat_name = session.query(Category).filter_by(cat_id=cat_id).one().name
     items = session.query(Item).filter_by(cat_id=cat_id)
-    if 'username' not in login_session:
-        return render_template('category.html',
-                               items=items, cat_name=cat_name, cat_id=cat_id)
-    else:
-        return render_template('category.html', login=True, items=items,
+    login = 'username' in login_session
+    return render_template('category.html',  login, items=items,
                                cat_name=cat_name, cat_id=cat_id)
 
 
@@ -325,10 +323,8 @@ def showItem(cat_id, item_id):
     ''' Show all details about an item '''
     cat_name = session.query(Category).filter_by(cat_id=cat_id).one().name
     item = session.query(Item).filter_by(item_id=item_id).one()
-    if 'username' not in login_session:
-        return render_template('item.html', item=item, cat_name=cat_name)
-    else:
-        return render_template('item.html', login=True, item=item,
+    login = 'username' in login_session
+    return render_template('item.html', login=login, item=item,
                                cat_name=cat_name)
 
 
