@@ -12,6 +12,7 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 from flask import Flask, render_template, request, redirect
 from flask import url_for, jsonify, flash
+from helpers import login_required
 
 app = Flask(__name__)
 
@@ -26,7 +27,6 @@ session = DBSession()
 
 # Create a state token to prevent request forgery.
 # Store it in the session for later validation
-
 
 @app.route('/')
 # shows a list of all categories
@@ -314,7 +314,7 @@ def showCategory(cat_id):
     cat_name = session.query(Category).filter_by(cat_id=cat_id).one().name
     items = session.query(Item).filter_by(cat_id=cat_id)
     login = 'username' in login_session
-    return render_template('category.html',  login, items=items,
+    return render_template('category.html',  login=login, items=items,
                                cat_name=cat_name, cat_id=cat_id)
 
 
@@ -329,10 +329,9 @@ def showItem(cat_id, item_id):
 
 
 @app.route('/category/add', methods=['GET', 'POST'])
+@login_required(login_session)
 def newCategory():
     ''' Create a new category'''
-    if 'username' not in login_session:
-        return redirect('/login')
     if request.method == 'POST':
         newCategory = Category(
             name=request.form['name'], user_id=login_session['user_id'])
@@ -346,32 +345,29 @@ def newCategory():
 
 
 @app.route('/category/item/add', methods=['GET', 'POST'])
+@login_required(login_session)
 def newItem():
     ''' Create a new item in a category '''
-    if 'username' not in login_session:
-        return redirect('/login')
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        cat_id = request.form['category']
+        print cat_id
+        newItem = Item(name=name, description=description, cat_id=cat_id,
+                        user_id=login_session['user_id'])
+        session.add(newItem)
+        session.commit()
+        return redirect(url_for('showHome'))
     else:
-        if request.method == 'POST':
-            name = request.form['name']
-            description = request.form['description']
-            cat_id = request.form['category']
-            print cat_id
-            newItem = Item(name=name, description=description, cat_id=cat_id,
-                           user_id=login_session['user_id'])
-            session.add(newItem)
-            session.commit()
-            return redirect(url_for('showHome'))
-        else:
-            categories = session.query(Category).all()
-            return render_template('newitem.html', categories=categories)
+        categories = session.query(Category).all()
+        return render_template('newitem.html', categories=categories)
 
 
 @app.route('/category/<int:cat_id>/edit', methods=['GET', 'POST'])
+@login_required(login_session)
 def editCategory(cat_id):
     ''' Edit a category '''
     edit_category = session.query(Category).filter_by(cat_id=cat_id).one()
-    if 'username' not in login_session:
-        return redirect('/login')
     if edit_category.user_id != login_session['user_id']:
         return ("<script>function myFunction() {alert('You are not authorized"
                 "to edit this category. Please create your own category in "
@@ -389,11 +385,10 @@ def editCategory(cat_id):
 
 
 @app.route('/category/<int:cat_id>/delete', methods=['GET', 'POST'])
+@login_required(login_session)
 def deleteCategory(cat_id):
     ''' Delete a Category '''
     delete_category = session.query(Category).filter_by(cat_id=cat_id).one()
-    if 'username' not in login_session:
-        return redirect('/login')
     if delete_category.user_id != login_session['user_id']:
         return ("<script>function myFunction() {alert('You are not authorized"
                 "to delete this category. Please create your own category in "
@@ -411,11 +406,10 @@ def deleteCategory(cat_id):
 
 @app.route('/category/<int:cat_id>/<int:item_id>/edit',
            methods=['GET', 'POST'])
+@login_required(login_session)
 def editItem(cat_id, item_id):
     ''' Edit an Item '''
     edit_item = session.query(Item).filter_by(item_id=item_id).one()
-    if 'username' not in login_session:
-        return redirect('/login')
     if edit_item.user_id != login_session['user_id']:
         return ("<script>function myFunction() {alert('You are not authorized"
                 "to edit this item. Please create your own item in "
@@ -441,11 +435,10 @@ def editItem(cat_id, item_id):
 
 @app.route('/category/<int:cat_id>/<int:item_id>/delete',
            methods=['GET', 'POST'])
+@login_required(login_session)
 def deleteItem(cat_id, item_id):
     ''' Delete an Item '''
     delete_item = session.query(Item).filter_by(item_id=item_id).one()
-    if 'username' not in login_session:
-        return redirect('/login')
     if delete_item.user_id != login_session['user_id']:
         return ("<script>function myFunction() {alert('You are not authorized"
                 "to delete this item. Please create your own item in "
@@ -466,10 +459,11 @@ def notFound(e):
     ''' Handle pages/URLs that don't exist '''
     return render_template('404.html'), 404
 
-# Helper funtions for creating user
+# Helper funtions
 
 
 def createUser(login_session):
+    ''' Create a new/first time user in DB '''
     newUser = User(name=login_session['username'], email=login_session[
                    'email'], picture=login_session['picture'])
     session.add(newUser)
@@ -479,11 +473,13 @@ def createUser(login_session):
 
 
 def getUserInfo(user_id):
+    ''' Query db for user info by id '''
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
 
 def getUserID(email):
+    ''' Query db for user info by email '''
     try:
         user = session.query(User).filter_by(email=email).one()
         return user.user_id
